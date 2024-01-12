@@ -1,4 +1,4 @@
-import { dag, Container, Directory, object, func } from "@dagger.io/dagger"
+import { dag, object, func } from "@dagger.io/dagger"
 
 const exclude = [".git"];
 const SNYK_IMAGE_TAG = "alpine";
@@ -42,9 +42,6 @@ class Snyk {
       token: string,
       severityThreshold?: string
   ): Promise<string> {
-    console.log("IAC ===================")
-    console.log(token)
-    console.log("===================")
     const SNYK_SEVERITY_THRESHOLD = severityThreshold || "low";
     const context = dag.host().directory(src);
     const secret = dag.setSecret("SNYK_TOKEN", token);
@@ -69,12 +66,9 @@ class Snyk {
    */
   @func
   async testContainer(
-      image: string | undefined = "alpine:latest",
+      image: string,
       token: string
   ): Promise<string> {
-    console.log("===================")
-    console.log(token)
-    console.log("===================")
     const secret = dag.setSecret("SNYK_TOKEN", token);
     const ctr = dag
       .pipeline("snyk-container")
@@ -89,29 +83,4 @@ class Snyk {
       ]);
     return ctr.stdout()
   }
-
-  @func
-  async wtf(
-      token: string,
-      imageRef: string,
-  ): Promise<string> {
-    console.log("WTF ===================")
-    console.log(token)
-    console.log("===================")
-    const secret = dag.setSecret("SNYK_TOKEN", token);
-    const ctr = dag
-      .pipeline("snyk-container")
-      .container()
-      .from(`snyk/snyk:${SNYK_IMAGE_TAG}`)
-      .withWorkdir("/app")
-      .withSecretVariable("SNYK_TOKEN", secret)
-      .withExec([
-        "snyk",
-        "container",
-        "test",
-        imageRef,
-      ]);
-    return ctr.stdout()
-  }
-
 }
