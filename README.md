@@ -1,5 +1,7 @@
 # Dagger Snyk module
 
+Known to work with Dagger v0.9.5.
+
 Check code, infrastructure-as-code and containers using Snyk from your Dagger pipelines.
 
 ```
@@ -14,7 +16,7 @@ Get this from your [Snyk Account page](https://app.snyk.io/account).
 Check the code in the current directory for vulnerabilities:
 
 ```
-dagger call test-code --src . --token $SNYK_TOKEN
+dagger call -m github.com/lukemarsden/dagger-snyk test-code --src . --token $SNYK_TOKEN
 ```
 
 
@@ -23,7 +25,7 @@ dagger call test-code --src . --token $SNYK_TOKEN
 Check the infrastructure-as-code (e.g. Terraform etc) in the current directory for issues:
 
 ```
-dagger call test-iac --src . --token $SNYK_TOKEN
+dagger call -m github.com/lukemarsden/dagger-snyk test-iac --src . --token $SNYK_TOKEN
 ```
 
 
@@ -32,5 +34,5 @@ dagger call test-iac --src . --token $SNYK_TOKEN
 Check the given container image for vulnerabilities:
 
 ```
-dagger --focus=false call test-container --image "alpine:latest" --token $SNYK_TOKEN
+dagger call -m github.com/lukemarsden/dagger-snyk test-container --image "alpine:latest" --token $SNYK_TOKEN
 ```
