@@ -25,7 +25,7 @@ Check code, infrastructure-as-code and containers using Snyk from your Dagger pi
 Check the code in the current directory for vulnerabilities:
 
 ```
-dagger call -m github.com/lukemarsden/dagger-snyk test-code --src . --org myorg --token $SNYK_TOKEN
+dagger call -m github.com/lukemarsden/dagger-snyk test-code --src . --org myorg --token env:SNYK_TOKEN
 ```
 
 ### Infrastructure-as-Code
