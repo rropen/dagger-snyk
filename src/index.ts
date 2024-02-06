@@ -1,4 +1,4 @@
-import { dag, object, func } from "@dagger.io/dagger"
+import { dag, object, func, Directory, Secret } from "@dagger.io/dagger"
 
 const exclude = [".git"];
 const SNYK_IMAGE_TAG = "alpine";
@@ -7,24 +7,22 @@ const SNYK_IMAGE_TAG = "alpine";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 class Snyk {
   /**
-   * example usage: "dagger call test-code --src . --token <your-snyk-token>"
+   * example usage: "dagger call test-code --src . --token env:SNYK_TOKEN"
    */
   @func
   async testCode(
-      src: string | undefined = ".",
-      token: string,
+      src: Directory,
+      token: Secret,
       severityThreshold?: string
   ): Promise<string> {
     const SNYK_SEVERITY_THRESHOLD = severityThreshold || "low";
-    const context = dag.host().directory(src);
-    const secret = dag.setSecret("SNYK_TOKEN", token);
     const ctr = dag
       .pipeline("snyk-code")
       .container()
       .from(`snyk/snyk:${SNYK_IMAGE_TAG}`)
-      .withDirectory("/app", context, { exclude })
+      .withDirectory("/app", src, { exclude })
       .withWorkdir("/app")
-      .withSecretVariable("SNYK_TOKEN", secret)
+      .withSecretVariable("SNYK_TOKEN", token)
       .withExec([
         "snyk",
         "test",
@@ -34,24 +32,22 @@ class Snyk {
   }
 
   /**
-   * example usage: "dagger call test-iac --src . --token <your-snyk-token>"
+   * example usage: "dagger call test-iac --src . --token env:SNYK_TOKEN"
    */
   @func
   async testIac(
-      src: string | undefined = ".",
-      token: string,
+      src: Directory,
+      token: Secret,
       severityThreshold?: string
   ): Promise<string> {
     const SNYK_SEVERITY_THRESHOLD = severityThreshold || "low";
-    const context = dag.host().directory(src);
-    const secret = dag.setSecret("SNYK_TOKEN", token);
     const ctr = dag
       .pipeline("snyk-iac")
       .container()
       .from(`snyk/snyk:${SNYK_IMAGE_TAG}`)
-      .withDirectory("/app", context, { exclude })
+      .withDirectory("/app", src, { exclude })
       .withWorkdir("/app")
-      .withSecretVariable("SNYK_TOKEN", secret)
+      .withSecretVariable("SNYK_TOKEN", token)
       .withExec([
         "snyk",
         "iac",
@@ -62,19 +58,18 @@ class Snyk {
   }
 
   /**
-   * example usage: "dagger call test-container --image alpine:latest --token <your-snyk-token>"
+   * example usage: "dagger call test-container --image alpine:latest --token env:SNYK_TOKEN"
    */
   @func
   async testContainer(
       image: string,
-      token: string
+      token: Secret,
   ): Promise<string> {
-    const secret = dag.setSecret("SNYK_TOKEN", token);
     const ctr = dag
       .pipeline("snyk-container")
       .container()
       .from(`snyk/snyk:${SNYK_IMAGE_TAG}`)
-      .withSecretVariable("SNYK_TOKEN", secret)
+      .withSecretVariable("SNYK_TOKEN", token)
       .withExec([
         "snyk",
         "container",
