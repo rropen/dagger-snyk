@@ -16,7 +16,7 @@ Get this from your [Snyk Account page](https://app.snyk.io/account).
 Check the code in the current directory for vulnerabilities:
 
 ```
-dagger call -m github.com/lukemarsden/dagger-snyk test-code --src . --token $SNYK_TOKEN
+dagger call -m github.com/lukemarsden/dagger-snyk test-code --src . --token env:SNYK_TOKEN
 ```
 
 
@@ -25,7 +25,7 @@ dagger call -m github.com/lukemarsden/dagger-snyk test-code --src . --token $SNY
 Check the infrastructure-as-code (e.g. Terraform etc) in the current directory for issues:
 
 ```
-dagger call -m github.com/lukemarsden/dagger-snyk test-iac --src . --token $SNYK_TOKEN
+dagger call -m github.com/lukemarsden/dagger-snyk test-iac --src . --token env:SNYK_TOKEN
 ```
 
 
@@ -34,5 +34,5 @@ dagger call -m github.com/lukemarsden/dagger-snyk test-iac --src . --token $SNYK
 Check the given container image for vulnerabilities:
 
 ```
-dagger call -m github.com/lukemarsden/dagger-snyk test-container --image "alpine:latest" --token $SNYK_TOKEN
+dagger call -m github.com/lukemarsden/dagger-snyk test-container --image "alpine:latest" --token env:SNYK_TOKEN
 ```
