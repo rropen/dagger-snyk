@@ -14,6 +14,7 @@ class Snyk {
     src: Directory,
     token: Secret,
     severityThreshold?: string,
+    org?: string
   ): Promise<string> {
     const SNYK_SEVERITY_THRESHOLD = severityThreshold || "low";
     const ctr = dag
@@ -40,6 +41,7 @@ class Snyk {
     src: Directory,
     token: Secret,
     severityThreshold?: string,
+    org?: string
   ): Promise<string> {
     const SNYK_SEVERITY_THRESHOLD = severityThreshold || "low";
     const ctr = dag
@@ -63,7 +65,11 @@ class Snyk {
    * example usage: "dagger call test-container --image alpine:latest --token env:SNYK_TOKEN"
    */
   @func
-  async testContainer(image: string, token: Secret): Promise<string> {
+  async testContainer(
+    image: string,
+    token: Secret,
+    org: string
+  ): Promise<string> {
     const ctr = dag
       .pipeline("snyk-container")
       .container()
