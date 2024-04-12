@@ -1,3 +1,9 @@
+// Security scan a container image with Snyk
+//
+// This module lets you security scan a container image using Snyk's hosted scanning API.
+//
+// For more info and sample usage, check the readme: https://github.com/lukemarsden/dagger-snyk
+
 import { dag, object, func, Directory, Secret } from "@dagger.io/dagger"
 
 const exclude = [".git"];
