@@ -6,18 +6,18 @@
  * For more info and sample usage, check the readme: https://github.com/lukemarsden/dagger-snyk
  */
 
-import { dag, object, func, Directory, Secret } from "@dagger.io/dagger"
+import { dag, Container, Directory, object, func } from "@dagger.io/dagger"
 
 const exclude = [".git"];
 const SNYK_IMAGE_TAG = "alpine";
 
-@object
+@object()
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 class Snyk {
   /**
    * example usage: "dagger call test-code --src . --token env:SNYK_TOKEN"
    */
-  @func
+  @func()
   async testCode(
       src: Directory,
       token: Secret,
@@ -42,7 +42,7 @@ class Snyk {
   /**
    * example usage: "dagger call test-iac --src . --token env:SNYK_TOKEN"
    */
-  @func
+  @func()
   async testIac(
       src: Directory,
       token: Secret,
@@ -68,7 +68,7 @@ class Snyk {
   /**
    * example usage: "dagger call test-container --image alpine:latest --token env:SNYK_TOKEN"
    */
-  @func
+  @func()
   async testContainer(
       image: string,
       token: Secret,
