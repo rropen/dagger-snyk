@@ -13,19 +13,30 @@ Check code, infrastructure-as-code and containers using Snyk from your Dagger pi
 
 ## Available Flags
 
-| Flag    | Required | Description                                                                                             | Command          | Available On |
-| ------- | -------- | ------------------------------------------------------------------------------------------------------- | ---------------- | ------------ |
-| --org   | No       | Your Snyk organization ID. You can get this from your [Snyk Account page](https://app.snyk.io/account). | `--org myorg`    | All          |
-| --image | Yes      | The container image to test.                                                                            | `--image alpine` | Containers   |
+| Flag          | Required | Description                                                                                             | Command                          | Available On            |
+| ------------- | -------- | ------------------------------------------------------------------------------------------------------- | -------------------------------- | ----------------------- |
+| --org         | No       | Your Snyk organization ID. You can get this from your [Snyk Account page](https://app.snyk.io/account). | `--org myorg`                    | All                     |
+| --image       | Yes      | The container image to test.                                                                            | `--image alpine`                 | ContainersTest          |
+| --src         | Yes      | The source folder to test.                                                                              | `--src ../project`               | Test, CodeTest, IacTest                 |
+| --policy-path | No       | The path pointing to .snyk policy definitions                                                           | `--policy-path ../project/.snyk` | All                     |
 
 ## Available Tests
 
-### Code
+### Test
 
 Check the code in the current directory for vulnerabilities:
 
 ```
-dagger call -m github.com/rropen/dagger-snyk test-code --src . --org myorg --token env:SNYK_TOKEN
+dagger call -m github.com/rropen/dagger-snyk snyk-test --src . --org myorg --token env:SNYK_TOKEN
+```
+
+
+### Code
+
+Call the SNYK SAST tool:
+
+```
+dagger call -m github.com/rropen/dagger-snyk snyk-test --src . --org myorg --token env:SNYK_TOKEN
 ```
 
 ### Infrastructure-as-Code
@@ -33,7 +44,7 @@ dagger call -m github.com/rropen/dagger-snyk test-code --src . --org myorg --tok
 Check the infrastructure-as-code (e.g. Terraform etc) in the current directory for issues:
 
 ```
-dagger call -m github.com/rropen/dagger-snyk test-iac --src . --org myorg --token $SNYK_TOKEN
+dagger call -m github.com/rropen/dagger-snyk snyk-iac-test --src . --org myorg --token $SNYK_TOKEN
 ```
 
 ### Containers
@@ -41,5 +52,5 @@ dagger call -m github.com/rropen/dagger-snyk test-iac --src . --org myorg --toke
 Check the given container image for vulnerabilities:
 
 ```
-dagger call -m github.com/rropen/dagger-snyk test-container --image "alpine:latest" --org myorg --token $SNYK_TOKEN
+dagger call -m github.com/rropen/dagger-snyk snyk-container-test --image "alpine:latest" --org myorg --token $SNYK_TOKEN
 ```

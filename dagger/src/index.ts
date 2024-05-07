@@ -1,4 +1,14 @@
-import { dag, object, func, Directory, Secret } from "@dagger.io/dagger";
+import {
+  dag,
+  object,
+  func,
+  Directory,
+  Secret,
+  Container,
+  File,
+  ExecError,
+} from "@dagger.io/dagger";
+import "./utils/containerExtensions";
 
 const exclude = [".git"];
 const SNYK_IMAGE_TAG = "alpine";
@@ -7,81 +17,135 @@ const SNYK_IMAGE_TAG = "alpine";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 class Snyk {
   /**
-   * example usage: "dagger call test-code --src . --token env:SNYK_TOKEN"
+   * example usage: "dagger call snyk-test --src . --token env:SNYK_TOKEN"
    */
   @func()
-  async testCode(
+  async snykTest(
     src: Directory,
     token: Secret,
     severityThreshold?: string,
-    org?: string
+    org?: string,
+    policyPath?: string[],
+    snykImageTag?: string
   ): Promise<string> {
+    const policyPaths = this.formatPolicyPaths(policyPath);
     const SNYK_SEVERITY_THRESHOLD = severityThreshold || "low";
-    const ctr = dag
-      .pipeline("snyk-code")
-      .container()
-      .from(`snyk/snyk:${SNYK_IMAGE_TAG}`)
+    const ctr = this.baseSnykContainer("code", token, snykImageTag)
       .withDirectory("/app", src, { exclude })
       .withWorkdir("/app")
-      .withSecretVariable("SNYK_TOKEN", token)
       .withExec([
         "snyk",
         "test",
         `--severity-threshold=${SNYK_SEVERITY_THRESHOLD}`,
         `${org ? `--org=${org}` : ""}`,
+        ...policyPaths,
       ]);
-    return ctr.stdout();
+
+    return ctr.tryStdout();
   }
 
   /**
-   * example usage: "dagger call test-iac --src . --token env:SNYK_TOKEN"
+   * example usage: "dagger call snyk-code-test --src . --token env:SNYK_TOKEN"
    */
   @func()
-  async testIac(
+  async snykCodeTest(
     src: Directory,
     token: Secret,
     severityThreshold?: string,
-    org?: string
+    org?: string,
+    policyPath?: string[],
+    snykImageTag?: string
   ): Promise<string> {
+    const policyPaths = this.formatPolicyPaths(policyPath);
     const SNYK_SEVERITY_THRESHOLD = severityThreshold || "low";
-    const ctr = dag
-      .pipeline("snyk-iac")
-      .container()
-      .from(`snyk/snyk:${SNYK_IMAGE_TAG}`)
+    const ctr = this.baseSnykContainer("code", token, snykImageTag)
       .withDirectory("/app", src, { exclude })
       .withWorkdir("/app")
-      .withSecretVariable("SNYK_TOKEN", token)
+      .withExec([
+        "snyk",
+        "code",
+        "test",
+        `--severity-threshold=${SNYK_SEVERITY_THRESHOLD}`,
+        `${org ? `--org=${org}` : ""}`,
+        ...policyPaths,
+      ]);
+
+    return ctr.tryStdout();
+  }
+
+  /**
+   * example usage: "dagger call snyk-iac-test --src . --token env:SNYK_TOKEN"
+   */
+  @func()
+  async snykIacTest(
+    src: Directory,
+    token: Secret,
+    severityThreshold?: string,
+    org?: string,
+    policyPath?: string[],
+    snykImageTag?: string
+  ): Promise<string> {
+    const SNYK_SEVERITY_THRESHOLD = severityThreshold || "low";
+    const policyPaths = this.formatPolicyPaths(policyPath);
+    this.baseSnykContainer("iac", token);
+    const ctr = this.baseSnykContainer("iac", token, snykImageTag)
+      .withDirectory("/app", src, { exclude })
+      .withWorkdir("/app")
       .withExec([
         "snyk",
         "iac",
         "test",
         `--severity-threshold=${SNYK_SEVERITY_THRESHOLD}`,
         `${org ? `--org=${org}` : ""}`,
+        ...policyPaths,
       ]);
-    return ctr.stdout();
+
+    return ctr.tryStdout();
   }
 
   /**
-   * example usage: "dagger call test-container --image alpine:latest --token env:SNYK_TOKEN"
+   * example usage: "dagger call snyk-container-test --image alpine:latest --token env:SNYK_TOKEN"
    */
   @func()
-  async testContainer(
+  async snykContainerTest(
     image: string,
     token: Secret,
-    org?: string
+    org?: string,
+    policyPath?: string[],
+    snykImageTag?: string
   ): Promise<string> {
-    const ctr = dag
-      .pipeline("snyk-container")
+    const policyPaths = this.formatPolicyPaths(policyPath);
+    const ctr = this.baseSnykContainer(
+      "container",
+      token,
+      snykImageTag
+    ).withExec([
+      "snyk",
+      "container",
+      "test",
+      image,
+      `${org ? `--org=${org}` : ""}`,
+      ...policyPaths,
+    ]);
+
+    return ctr.tryStdout();
+  }
+
+  baseSnykContainer(
+    label: string,
+    token: Secret,
+    snykImageTag = SNYK_IMAGE_TAG
+  ): Container {
+    return dag
+      .pipeline(`snyk-${label}`)
       .container()
-      .from(`snyk/snyk:${SNYK_IMAGE_TAG}`)
-      .withSecretVariable("SNYK_TOKEN", token)
-      .withExec([
-        "snyk",
-        "container",
-        "test",
-        image,
-        `${org ? `--org=${org}` : ""}`,
-      ]);
-    return ctr.stdout();
+      .from(`snyk/snyk:${snykImageTag}`)
+      .withSecretVariable("SNYK_TOKEN", token);
+  }
+
+  formatPolicyPaths(policyPath?: string[]) {
+    return policyPath
+      ? policyPath.map((path) => (policyPath ? `--policy-path=${path}` : ""))
+      : [];
   }
 }
