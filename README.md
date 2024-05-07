@@ -1,6 +1,6 @@
 # Dagger Snyk module
 
-Known to work with Dagger v0.9.8 only (for v0.9.5 support, see v0.1.0 release).
+Known to work with Dagger v0.11.2
 
 Check code, infrastructure-as-code and containers using Snyk from your Dagger pipelines.
 
@@ -36,7 +36,7 @@ dagger call -m github.com/rropen/dagger-snyk snyk-test --src . --org myorg --tok
 Call the SNYK SAST tool:
 
 ```
-dagger call -m github.com/rropen/dagger-snyk snyk-test --src . --org myorg --token env:SNYK_TOKEN
+dagger call -m github.com/rropen/dagger-snyk snyk-code-test --src . --org myorg --token env:SNYK_TOKEN
 ```
 
 ### Infrastructure-as-Code
