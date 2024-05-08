@@ -30,7 +30,7 @@ class Snyk {
   ): Promise<string> {
     const policyPaths = this.formatPolicyPaths(policyPath);
     const SNYK_SEVERITY_THRESHOLD = severityThreshold || "low";
-    const ctr = this.baseSnykContainer("code", token, snykImageTag)
+    const ctr = this.baseSnykContainer("test", token, snykImageTag)
       .withDirectory("/app", src, { exclude })
       .withWorkdir("/app")
       .withExec([
